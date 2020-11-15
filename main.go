@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"github.com/asishshaji/notvine/app"
@@ -24,19 +25,24 @@ func init() {
 }
 
 func main() {
-	db := initDB()
-	repo := repository.NewMongoRepo(db, "repo")
+	port := os.Getenv("SERVER_PORT")
+	dbName := os.Getenv("DB_NAME")
+	mongodbURL := os.Getenv("MONGODB_URL")
+
+	db := initDB(mongodbURL)
+	repo := repository.NewMongoRepo(db, dbName)
 
 	usecase := usecase.NewAppUsecase(*repo)
 	controller := controller.NewAppController(*usecase)
-	app := app.NewApp(":9090", *controller)
+	app := app.NewApp(port, *controller)
 
 	app.RunServer()
 
 }
 
-func initDB() *mongo.Database {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+func initDB(mongodbURL string) *mongo.Database {
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongodbURL))
 	if err != nil {
 		log.Fatalf("Error occured while establishing connection to mongoDB")
 	}
@@ -55,7 +61,7 @@ func initDB() *mongo.Database {
 		log.Fatal(err)
 	}
 
-	log.Println("Connected to MongoDB ")
+	log.Println("Connected to MongoDB")
 
 	return client.Database("DB")
 }

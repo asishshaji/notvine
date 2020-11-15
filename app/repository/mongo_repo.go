@@ -10,10 +10,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Mongorepo create Repo
 type Mongorepo struct {
 	db *mongo.Collection
 }
 
+// NewMongoRepo creates instance of Mongorepo
 func NewMongoRepo(db *mongo.Database, collection string) *Mongorepo {
 
 	return &Mongorepo{
@@ -21,6 +23,8 @@ func NewMongoRepo(db *mongo.Database, collection string) *Mongorepo {
 	}
 
 }
+
+// CreateUser creates a new user
 func (repo *Mongorepo) CreateUser(ctx context.Context, user *entity.User) error {
 
 	exists, _ := repo.CheckUserExists(ctx, user)
@@ -40,13 +44,29 @@ func (repo *Mongorepo) CreateUser(ctx context.Context, user *entity.User) error 
 
 }
 
+// CheckUserExists checks if the user exists
 func (repo *Mongorepo) CheckUserExists(ctx context.Context, user *entity.User) (bool, error) {
 
-	err := repo.db.FindOne(ctx, bson.M{"username": user.Username})
+	res := repo.db.FindOne(ctx, bson.M{"username": user.Username})
 
-	if err.Err() == nil {
-		return true, err.Err()
+	if res.Err() == nil {
+		return true, res.Err()
 	}
 
-	return false, err.Err()
+	return false, res.Err()
+}
+
+// CheckUsernamePassword returns user entity with passed username and password
+func (repo *Mongorepo) CheckUsernamePassword(ctx context.Context, username, password string) (*entity.User, error) {
+
+	user := entity.User{}
+
+	err := repo.db.FindOne(ctx, bson.M{"username": username, "password": password}).Decode(&user)
+
+	if err != nil {
+		return nil, errors.New("username and password doesn't match")
+	}
+
+	return &user, nil
+
 }

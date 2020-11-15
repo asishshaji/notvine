@@ -22,8 +22,6 @@ func NewAppUsecase(
 
 func (a *AppUsecase) Signup(ctx context.Context, username, password string) (*entity.User, error) {
 
-	// Search for existing user, if user exists return err
-
 	user := entity.User{
 		Username: username,
 		Password: password,
@@ -38,4 +36,13 @@ func (a *AppUsecase) Signup(ctx context.Context, username, password string) (*en
 
 }
 
-// func (a *AppUsecase) Signup(ctx context.Context, username, password string) {}
+func (a *AppUsecase) Login(ctx context.Context, username, password string) (*entity.User, error) {
+
+	user, err := a.repo.CheckUsernamePassword(ctx, username, password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

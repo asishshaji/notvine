@@ -21,6 +21,7 @@ func NewApp(port string, controller controller.AppController) *App {
 	e.Use(middleware.Recover())
 
 	e.POST("/signup", controller.Signup)
+	e.POST("/login", controller.Login)
 
 	return &App{
 		e:    e,
