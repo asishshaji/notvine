@@ -1,43 +1,45 @@
 package app
 
 import (
-	"context"
-	"log"
-	"time"
+	"net/http"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/asishshaji/notvine/app/controller"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type App struct {
-	Router delivery.Router
+	e    *echo.Echo
+	port string
 }
 
-func NewApp(router *delivery.Router, port string) *App {
-	db := initDB()
+// NewApp creates new app
+func NewApp(port string, controller controller.AppController) *App {
+
+	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	// e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+	// 	SigningKey: []byte("randomstring"), //read from .env file
+	// }))
+
+	e.POST("/signup", controller.Signup)
+
+	return &App{
+		e:    e,
+		port: port,
+	}
+
 }
 
-func initDB() *mongo.Database {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
-	if err != nil {
-		log.Fatalf("Error occured while establishing connection to mongoDB")
-	}
+func accessible(c echo.Context) error {
+	return c.String(http.StatusOK, "Accessible")
+}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+// RunServer starts the server
+func (a *App) RunServer() {
+	a.e.Logger.Fatal(a.e.Start(a.port))
 
-	err = client.Connect(ctx)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("Connected to MongoDB ")
-
-	return client.Database("DB")
 }
