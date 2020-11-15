@@ -9,6 +9,7 @@ import (
 type RepositoryInterface interface {
 	// User
 	CreateUser(ctx context.Context, user *entity.User) error
+	CheckUserExists(ctx context.Context, user *entity.User) (bool, error)
 	// GetUser(username, password string) (*models.User, error)
 	// GetUserFeed(uid string) ([]*models.Post, error)
 
