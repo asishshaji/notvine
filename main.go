@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	firebase "firebase.google.com/go"
 	"github.com/asishshaji/notvine/app"
 	"github.com/asishshaji/notvine/app/controller"
 	"github.com/asishshaji/notvine/app/repository"
@@ -15,6 +14,8 @@ import (
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	firebase "firebase.google.com/go/v4"
 	"google.golang.org/api/option"
 )
 
@@ -37,9 +38,9 @@ func main() {
 	db := initDB(mongodbURL)
 	bucket := initStorage(storageBucket, credentialFilePath)
 
-	repo := repository.NewMongoRepo(db, dbName, bucket)
+	repo := repository.NewMongoRepo(db, dbName)
 	usecase := usecase.NewAppUsecase(*repo)
-	controller := controller.NewAppController(*usecase)
+	controller := controller.NewAppController(*usecase, bucket)
 
 	app := app.NewApp(port, *controller)
 

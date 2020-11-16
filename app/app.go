@@ -23,6 +23,8 @@ func NewApp(port string, controller controller.AppController) *App {
 	e.POST("/signup", controller.Signup)
 	e.POST("/login", controller.Login)
 
+	e.POST("/create", controller.CreatePost)
+
 	return &App{
 		e:    e,
 		port: port,

@@ -1,22 +1,28 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/asishshaji/notvine/app/usecase"
+	"github.com/asishshaji/notvine/app/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 )
 
 type AppController struct {
 	appusecase usecase.AppUsecase
+	bucket     *storage.BucketHandle
 }
 
-func NewAppController(usecase usecase.AppUsecase) *AppController {
+func NewAppController(usecase usecase.AppUsecase, bucket *storage.BucketHandle) *AppController {
 	return &AppController{
 		appusecase: usecase,
+		bucket:     bucket,
 	}
+
 }
 
 // Signup creates user in the database
@@ -63,5 +69,26 @@ func (a *AppController) Login(c echo.Context) error {
 
 }
 
-// func (a *AppController) CreatePost(c echo.Context) (entity.Post, error) {}
+func (a *AppController) CreatePost(c echo.Context) error {
+
+	file, err := c.FormFile("video_file")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]error{
+			"error": err,
+		})
+	}
+	link, err1 := utils.UploadVideo(file, a.bucket)
+	log.Println(link)
+
+	if err1 != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]error{
+			"error": err,
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Created Post",
+	})
+}
+
 // func (a *AppController) GetUser(c echo.Context) (entity.User, error)    {}
