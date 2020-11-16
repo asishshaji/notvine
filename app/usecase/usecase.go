@@ -46,3 +46,27 @@ func (a *AppUsecase) Login(ctx context.Context, username, password string) (*ent
 
 	return user, nil
 }
+
+func (a *AppUsecase) GetUser(ctx context.Context, username string) (*entity.User, error) {
+
+	user, err := a.repo.GetUser(ctx, username)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+
+}
+
+func (a *AppUsecase) CreatePost(ctx context.Context, post *entity.Post) error {
+
+	err := a.repo.CreatePost(ctx, post)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

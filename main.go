@@ -65,7 +65,7 @@ func initStorage(storageBucket, credentialFilePath string) *storage.BucketHandle
 		log.Fatalln(err)
 	}
 
-	bucket, err := client.DefaultBucket()
+	bucket, err := client.Bucket("videos")
 	if err != nil {
 		log.Fatalln(err)
 	}

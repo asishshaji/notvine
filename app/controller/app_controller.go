@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/asishshaji/notvine/app/entity"
 	"github.com/asishshaji/notvine/app/usecase"
 	"github.com/asishshaji/notvine/app/utils"
 	"github.com/dgrijalva/jwt-go"
@@ -72,17 +72,46 @@ func (a *AppController) Login(c echo.Context) error {
 func (a *AppController) CreatePost(c echo.Context) error {
 
 	file, err := c.FormFile("video_file")
+	caption := c.FormValue("caption")
+
+	userJWT := c.Get("user").(*jwt.Token)
+	claims := userJWT.Claims.(jwt.MapClaims)
+	username := claims["username"].(string)
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]error{
 			"error": err,
 		})
 	}
 	link, err1 := utils.UploadVideo(file, a.bucket)
-	log.Println(link)
 
 	if err1 != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]error{
-			"error": err,
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err1.Error(),
+		})
+	}
+
+	user, err3 := a.appusecase.GetUser(c.Request().Context(), username)
+
+	if err3 != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err3.Error(),
+		})
+	}
+
+	post := entity.Post{
+		URL:        link,
+		Owner:      user,
+		Caption:    caption,
+		LikesCount: 0,
+		CreatedAt:  time.Now(),
+	}
+
+	postErr := a.appusecase.CreatePost(c.Request().Context(), &post)
+
+	if postErr != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": postErr.Error(),
 		})
 	}
 

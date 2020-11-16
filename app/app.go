@@ -23,7 +23,10 @@ func NewApp(port string, controller controller.AppController) *App {
 	e.POST("/signup", controller.Signup)
 	e.POST("/login", controller.Login)
 
-	e.POST("/create", controller.CreatePost)
+	// restricted Group
+	r := e.Group("/user")
+	r.Use(middleware.JWT([]byte("secret")))
+	r.POST("/create", controller.CreatePost)
 
 	return &App{
 		e:    e,

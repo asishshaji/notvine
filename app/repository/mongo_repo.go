@@ -58,6 +58,18 @@ func (repo *Mongorepo) CheckUserExists(ctx context.Context, user *entity.User) (
 	return false, res.Err()
 }
 
+func (repo *Mongorepo) GetUser(ctx context.Context, username string) (*entity.User, error) {
+
+	user := entity.User{}
+	res := repo.db.FindOne(ctx, bson.M{"username": username})
+
+	err := res.Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // CheckUsernamePassword returns user entity with passed username and password
 func (repo *Mongorepo) CheckUsernamePassword(ctx context.Context, username, password string) (*entity.User, error) {
 
