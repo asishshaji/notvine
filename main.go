@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"cloud.google.com/go/storage"
+	firebase "firebase.google.com/go"
 	"github.com/asishshaji/notvine/app"
 	"github.com/asishshaji/notvine/app/controller"
 	"github.com/asishshaji/notvine/app/repository"
@@ -13,6 +15,7 @@ import (
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"google.golang.org/api/option"
 )
 
 func init() {
@@ -28,15 +31,45 @@ func main() {
 	port := os.Getenv("SERVER_PORT")
 	dbName := os.Getenv("DB_NAME")
 	mongodbURL := os.Getenv("MONGODB_URL")
+	storageBucket := os.Getenv("STORAGE_BUCKET")
+	credentialFilePath := os.Getenv("CRED_FILE")
 
 	db := initDB(mongodbURL)
-	repo := repository.NewMongoRepo(db, dbName)
+	bucket := initStorage(storageBucket, credentialFilePath)
 
+	repo := repository.NewMongoRepo(db, dbName, bucket)
 	usecase := usecase.NewAppUsecase(*repo)
 	controller := controller.NewAppController(*usecase)
+
 	app := app.NewApp(port, *controller)
 
 	app.RunServer()
+
+}
+
+func initStorage(storageBucket, credentialFilePath string) *storage.BucketHandle {
+	config := &firebase.Config{
+		StorageBucket: storageBucket,
+	}
+
+	opt := option.WithCredentialsFile(credentialFilePath)
+
+	app, err := firebase.NewApp(context.Background(), config, opt)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	client, err := app.Storage(context.Background())
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	bucket, err := client.DefaultBucket()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return bucket
 
 }
 

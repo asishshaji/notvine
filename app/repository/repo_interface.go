@@ -6,8 +6,8 @@ import (
 	"github.com/asishshaji/notvine/app/entity"
 )
 
-// RepositoryInterface creates interface for repository
-type RepositoryInterface interface {
+// Interface creates interface for repository
+type Interface interface {
 	// Users
 	CreateUser(ctx context.Context, user *entity.User) error
 	CheckUserExists(ctx context.Context, user *entity.User) (bool, error)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"cloud.google.com/go/storage"
 	"github.com/asishshaji/notvine/app/entity"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,16 +13,16 @@ import (
 
 // Mongorepo create Repo
 type Mongorepo struct {
-	db *mongo.Collection
+	db     *mongo.Collection
+	bucket *storage.BucketHandle
 }
 
 // NewMongoRepo creates instance of Mongorepo
-func NewMongoRepo(db *mongo.Database, collection string) *Mongorepo {
-
+func NewMongoRepo(db *mongo.Database, collection string, bucket *storage.BucketHandle) *Mongorepo {
 	return &Mongorepo{
-		db: db.Collection(collection),
+		db:     db.Collection(collection),
+		bucket: bucket,
 	}
-
 }
 
 // CreateUser creates a new user

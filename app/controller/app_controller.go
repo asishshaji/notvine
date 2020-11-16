@@ -19,17 +19,32 @@ func NewAppController(usecase usecase.AppUsecase) *AppController {
 	}
 }
 
+// Signup creates user in the database
 func (a *AppController) Signup(c echo.Context) error {
 
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	user, err := a.appusecase.Signup(c.Request().Context(), username, password)
+	_, err := a.appusecase.Signup(c.Request().Context(), username, password)
 
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
+	return nil
+
+}
+
+// Login sends token to user
+func (a *AppController) Login(c echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	user, err := a.appusecase.Login(c.Request().Context(), username, password)
+
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	claims := token.Claims.(jwt.MapClaims)
@@ -46,19 +61,6 @@ func (a *AppController) Signup(c echo.Context) error {
 		"token": t,
 	})
 
-}
-
-func (a *AppController) Login(c echo.Context) error {
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-
-	user, err := a.appusecase.Login(c.Request().Context(), username, password)
-
-	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
-	}
-
-	return c.JSON(http.StatusOK, user)
 }
 
 // func (a *AppController) CreatePost(c echo.Context) (entity.Post, error) {}
