@@ -17,7 +17,7 @@ type AppController struct {
 	bucket     *storage.BucketHandle
 }
 
-func NewAppController(usecase usecase.AppUsecase, bucket *storage.BucketHandle) *AppController {
+func NewAppController(usecase usecase.AppUsecase, bucket *storage.BucketHandle) ControllerInterface {
 	return &AppController{
 		appusecase: usecase,
 		bucket:     bucket,
@@ -69,6 +69,7 @@ func (a *AppController) Login(c echo.Context) error {
 
 }
 
+// CreatePost creates new post
 func (a *AppController) CreatePost(c echo.Context) error {
 
 	file, err := c.FormFile("video_file")
@@ -119,5 +120,3 @@ func (a *AppController) CreatePost(c echo.Context) error {
 		"message": "Created Post",
 	})
 }
-
-// func (a *AppController) GetUser(c echo.Context) (entity.User, error)    {}

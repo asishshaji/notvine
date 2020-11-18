@@ -6,13 +6,15 @@ import (
 	"github.com/asishshaji/notvine/app/entity"
 )
 
-// Interface creates interface for repository
-type Interface interface {
+// RepoInterface creates interface for repository
+type RepoInterface interface {
 	// Users
 	CreateUser(ctx context.Context, user *entity.User) error
 	CheckUserExists(ctx context.Context, user *entity.User) (bool, error)
-	GetUser(username, password string) (*entity.User, error)
-	Login(ctx context.Context, username, password string) (*entity.User, error)
+	GetUser(ctx context.Context, username string) (*entity.User, error)
+	CreatePost(ctx context.Context, post *entity.Post) error
+	// Login(ctx context.Context, username, password string) (*entity.User, error)
+	CheckUsernamePassword(ctx context.Context, username, password string) (*entity.User, error)
 	// GetUserFeed(uid string) ([]*models.Post, error)
 
 	// // Posts

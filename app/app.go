@@ -13,7 +13,7 @@ type App struct {
 }
 
 // NewApp creates new app
-func NewApp(port string, controller controller.AppController) *App {
+func NewApp(port string, controller controller.ControllerInterface) *App {
 
 	e := echo.New()
 

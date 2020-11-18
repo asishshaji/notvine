@@ -8,11 +8,11 @@ import (
 )
 
 type AppUsecase struct {
-	repo repository.Mongorepo
+	repo repository.RepoInterface
 }
 
 func NewAppUsecase(
-	userRepo repository.Mongorepo,
+	userRepo repository.RepoInterface,
 ) *AppUsecase {
 	return &AppUsecase{
 		repo: userRepo,
