@@ -31,12 +31,14 @@ func (a *AppController) Signup(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	_, err := a.appusecase.Signup(c.Request().Context(), username, password)
+	user, err := a.appusecase.Signup(c.Request().Context(), username, password)
 
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-
+	if user != nil {
+		return c.JSON(http.StatusOK, user)
+	}
 	return nil
 
 }
@@ -92,17 +94,17 @@ func (a *AppController) CreatePost(c echo.Context) error {
 		})
 	}
 
-	user, err3 := a.appusecase.GetUser(c.Request().Context(), username)
+	_, err3 := a.appusecase.GetUser(c.Request().Context(), username)
 
 	if err3 != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err3.Error(),
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"message": "No such user exits",
 		})
 	}
 
 	post := entity.Post{
 		URL:        link,
-		Owner:      user,
+		Owner:      username,
 		Caption:    caption,
 		LikesCount: 0,
 		CreatedAt:  time.Now(),

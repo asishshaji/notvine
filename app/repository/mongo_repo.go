@@ -13,18 +13,27 @@ import (
 
 // Mongorepo create Repo
 type Mongorepo struct {
-	db *mongo.Collection
+	userCollection *mongo.Collection
+	postCollection *mongo.Collection
 }
 
 // NewMongoRepo creates instance of Mongorepo
-func NewMongoRepo(db *mongo.Database, collection string) RepoInterface {
+func NewMongoRepo(db *mongo.Database, userCollection, postCollection string) RepoInterface {
 	return Mongorepo{
-		db: db.Collection(collection),
+		userCollection: db.Collection(userCollection),
+		postCollection: db.Collection(postCollection),
 	}
 }
 
+// CreatePost creates a new post
 func (repo Mongorepo) CreatePost(ctx context.Context, post *entity.Post) error {
-	log.Println(post)
+	res, err := repo.postCollection.InsertOne(ctx, post)
+	if err != nil {
+		return err
+	}
+
+	log.Println("New post created : ", res)
+
 	return nil
 
 }
@@ -38,7 +47,7 @@ func (repo Mongorepo) CreateUser(ctx context.Context, user *entity.User) error {
 		return errors.New("User already exists")
 	}
 
-	result, err := repo.db.InsertOne(ctx, user)
+	result, err := repo.userCollection.InsertOne(ctx, user)
 
 	if err != nil {
 		return err
@@ -50,9 +59,10 @@ func (repo Mongorepo) CreateUser(ctx context.Context, user *entity.User) error {
 }
 
 // CheckUserExists checks if the user exists
+// Can also be used to check if username is available
 func (repo Mongorepo) CheckUserExists(ctx context.Context, user *entity.User) (bool, error) {
 
-	res := repo.db.FindOne(ctx, bson.M{"username": user.Username})
+	res := repo.userCollection.FindOne(ctx, bson.M{"username": user.Username})
 
 	if res.Err() == nil {
 		return true, res.Err()
@@ -64,7 +74,7 @@ func (repo Mongorepo) CheckUserExists(ctx context.Context, user *entity.User) (b
 func (repo Mongorepo) GetUser(ctx context.Context, username string) (*entity.User, error) {
 
 	user := entity.User{}
-	res := repo.db.FindOne(ctx, bson.M{"username": username})
+	res := repo.userCollection.FindOne(ctx, bson.M{"username": username})
 
 	err := res.Decode(&user)
 	if err != nil {
@@ -78,7 +88,7 @@ func (repo Mongorepo) CheckUsernamePassword(ctx context.Context, username, passw
 
 	user := entity.User{}
 
-	err := repo.db.FindOne(ctx, bson.M{"username": username, "password": password}).Decode(&user)
+	err := repo.userCollection.FindOne(ctx, bson.M{"username": username, "password": password}).Decode(&user)
 
 	if err != nil {
 		return nil, errors.New("username and password doesn't match")
