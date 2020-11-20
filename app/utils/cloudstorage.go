@@ -10,13 +10,14 @@ import (
 
 	"cloud.google.com/go/storage"
 	firebase "firebase.google.com/go"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/api/option"
 )
 
 func UploadVideo(file *multipart.FileHeader, bucket *storage.BucketHandle) (string, error) {
-
+	id := uuid.New()
 	//TODO Delete files in temp folder here
 
 	src, err := file.Open()
@@ -30,16 +31,10 @@ func UploadVideo(file *multipart.FileHeader, bucket *storage.BucketHandle) (stri
 	defer cancel()
 
 	obj := bucket.Object(file.Filename)
-	acl := obj.ACL()
-
-	if err := acl.Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
-		log.Println(err)
-
-		return "", fmt.Errorf("ACLHandle.Set: %v", err)
-	}
 
 	w := obj.NewWriter(ctx)
 
+	w.ObjectAttrs.Metadata = map[string]string{"firebaseStorageDownloadTokens": id.String()}
 	objAtrrs, _ := obj.Attrs(ctx)
 
 	if _, err = io.Copy(w, src); err != nil {
@@ -47,11 +42,9 @@ func UploadVideo(file *multipart.FileHeader, bucket *storage.BucketHandle) (stri
 		return "", fmt.Errorf("Error copying %v", err)
 	}
 
-	if err := w.Close(); err != nil {
-		return "", fmt.Errorf("Writer.Close: %v", err)
+	if err := obj.ACL().Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
+		return "", err
 	}
-
-	log.Println(w.Bucket)
 
 	return objAtrrs.MediaLink, nil
 }
@@ -74,7 +67,7 @@ func InitStorage(storageBucket, credentialFilePath string) *storage.BucketHandle
 		log.Fatalln(err)
 	}
 
-	bucket, err := client.Bucket("videos")
+	bucket, err := client.DefaultBucket()
 	if err != nil {
 		log.Fatalln(err)
 	}

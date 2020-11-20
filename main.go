@@ -22,6 +22,7 @@ func init() {
 }
 
 func main() {
+	// Loading data from .env
 	port := os.Getenv("SERVER_PORT")
 	dbName := os.Getenv("DB_NAME")
 	mongodbURL := os.Getenv("MONGODB_URL")
@@ -29,6 +30,7 @@ func main() {
 	credentialFilePath := os.Getenv("CRED_FILE")
 	collectionName := os.Getenv("COLLECTION_NAME")
 
+	// Initialising database and cloud storage
 	db := utils.InitDB(mongodbURL, dbName)
 	bucket := utils.InitStorage(storageBucket, credentialFilePath)
 

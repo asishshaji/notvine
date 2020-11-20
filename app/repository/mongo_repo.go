@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/asishshaji/notvine/app/entity"
 	"go.mongodb.org/mongo-driver/bson"
@@ -23,7 +24,9 @@ func NewMongoRepo(db *mongo.Database, collection string) RepoInterface {
 }
 
 func (repo Mongorepo) CreatePost(ctx context.Context, post *entity.Post) error {
+	log.Println(post)
 	return nil
+
 }
 
 // CreateUser creates a new user

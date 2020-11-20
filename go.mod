@@ -22,7 +22,7 @@ require (
 	github.com/google/martian v2.1.0+incompatible // indirect
 	github.com/google/martian/v3 v3.1.0 // indirect
 	github.com/google/pprof v0.0.0-20201023163331-3e6fc7fc9c4c // indirect
-	github.com/google/uuid v1.1.2 // indirect
+	github.com/google/uuid v1.1.2
 	github.com/grpc-ecosystem/grpc-gateway v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/joho/godotenv v1.3.0
